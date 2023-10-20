@@ -1,4 +1,4 @@
 node_modules
 .env
 google.json
-tmp_backups/
+tmp_backups/*
