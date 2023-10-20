@@ -1,4 +1,4 @@
-node_modules
-.env
-google.json
+/node_modules
+/.env
+/google.json
 tmp_backups/*
