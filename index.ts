@@ -15,9 +15,42 @@ const exportDB = () => {
     database: process.env.DB_NAME,
   };
 
+  const backup_soln_type = process.env.BACKUP_SOLN_TYPE;
+
   const date_time = getDate();
-  const dump_path = `tmp_backups/backup-${date_time}.sql.gz`;
+
+  if (backup_soln_type === "xtrabackup") {
+    useXtrabackup(dbConfig, date_time);
+  } else {
+    useMysqlDump(dbConfig, date_time);
+  }
+};
+
+const getDate = (): string => {
+  const d = new Date();
+  const date_time: string = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}T${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}:${d.getMilliseconds()}`;
+
+  return date_time;
+};
+
+const useXtrabackup = async (dbConfig: any, date_time: string) => {
+  const dump_path = `tmp_backups/xtrabackups/backup-${dbConfig.database}-${date_time}`;
+
+  try {
+    const backupCmd = `sudo xtrabackup --backup --databases='${dbConfig.database}' --target-dir='${dump_path}'  --host=${dbConfig.host} --user=${dbConfig.user} --password=${dbConfig.password} --compress`;
+
+    backupDB(backupCmd, date_time, dump_path);
+  } catch (e: any) {
+    console.log(`2. Backup download failed backup errored: ${e?.message}`);
+    await new SendMail(date_time, "").failDump(e?.message);
+  }
+};
+
+const useMysqlDump = (dbConfig: any, date_time: string) => {
+  const dump_path = `tmp_backups/mysqldumps/backup-${date_time}.sql.gz`;
   let connection: any = null;
+
+  const dumpCommand = `mysqldump --host=${dbConfig.host} --user=${dbConfig.user} --password=${dbConfig.password} ${dbConfig.database} | gzip > ${dump_path}`;
 
   connection = mysql.createConnection(dbConfig);
 
@@ -27,49 +60,57 @@ const exportDB = () => {
       return;
     }
 
-    const dumpCommand = `mysqldump --host=${dbConfig.host} --user=${dbConfig.user} --password=${dbConfig.password} ${dbConfig.database} | gzip > ${dump_path}`;
+    backupDB(dumpCommand, date_time, dump_path, connection);
 
-    console.log("1. Dumping backup");
-    exec(dumpCommand, async (dumpError, stdout, stderr) => {
-      let download_path = "";
-
-      if (dumpError) {
-        console.log(`2. Emailing backup errored: ${stderr}`);
-        await new SendMail(date_time, download_path).failDump(stderr);
-      } else {
-        try {
-          console.log("3. Uploading dump");
-          download_path = await new SaveDumpFile(dump_path).upload();
-        } catch (e: any) {
-          let err_msg = "";
-          if (typeof e === "string") {
-            err_msg = e;
-          } else {
-            err_msg = e.message;
-          }
-
-          const upload_err = `Failed to upload dump file ${err_msg}`;
-          console.log("4. Emailing error dump: ", upload_err);
-          await new SendMail(date_time, download_path).failDump(upload_err);
-        }
-
-        console.log("6. Emailing success backup");
-        await new SendMail(date_time, download_path).successDump();
-      }
-
-      console.log("7. Removing the dump locally");
-      exec(`rm -rf ${dump_path}`);
-
-      connection.end();
-    });
+    try {
+      connection.end;
+    } catch (e: any) {
+      console.log("connection was already terminated");
+    }
   });
 };
 
-const getDate = (): string => {
-  const d = new Date();
-  const date_time: string = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}T${d.getHours()}:${d.getMinutes()}:${d.getSeconds()}:${d.getMilliseconds()}`;
+const backupDB = (
+  dumpCommand: string,
+  date_time: string,
+  dump_path: string,
+  connection: any = null
+) => {
+  console.log("1. Dumping backup");
+  exec(dumpCommand, async (dumpError, stdout, stderr) => {
+    let download_path = "";
 
-  return date_time;
+    if (dumpError) {
+      console.log(`2. Emailing backup errored: ${stderr}`);
+      await new SendMail(date_time, download_path).failDump(stderr);
+    } else {
+      try {
+        console.log("3. Uploading dump");
+        download_path = await new SaveDumpFile(dump_path).upload();
+      } catch (e: any) {
+        let err_msg = "";
+        if (typeof e === "string") {
+          err_msg = e;
+        } else {
+          err_msg = e.message;
+        }
+
+        const upload_err = `Failed to upload dump file ${err_msg}`;
+        console.log("4. Emailing error dump: ", upload_err);
+        await new SendMail(date_time, download_path).failDump(upload_err);
+      }
+
+      console.log("6. Emailing success backup");
+      await new SendMail(date_time, download_path).successDump();
+    }
+
+    console.log("7. Removing the dump locally");
+    exec(`rm -rf ${dump_path}`);
+
+    if (connection) {
+      connection.end();
+    }
+  });
 };
 
 // initiate script
