@@ -1,5 +1,5 @@
 import * as dotenv from "dotenv";
-import GenerateMailHtml from "../GenerateMailHtml";
+import GenerateMailHtml from "../../GenerateMailHtml";
 import Postmark from "./Drivers/Postmark";
 import Smtp from "./Drivers/Smtp";
 

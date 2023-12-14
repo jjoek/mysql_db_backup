@@ -19,13 +19,7 @@ We support several storage drivers listed below:
 
 > Google cloud storage
 
-Begin by installing the GCS npm sdk with:
-
-```
-npm i @google-cloud/storage
-```
-
-Then on the environment variables add the following:
+Begin by setting up environment variables:
 
 ```
 STORAGE_DRIVER=googleCloud
@@ -35,13 +29,7 @@ GOOGLE_BUCKET_NAME=
 
 > Digital Ocean spaces
 
-Begin by installing the aws s3 sdk
-
-```
-npm i @aws-sdk/client-s3
-```
-
-Setup env to have the following values pre-specified:
+Begin by setting up env to have the following values pre-specified:
 
 ```
 STORAGE_DRIVER=spaces
@@ -178,5 +166,5 @@ npm install pm2 -g
 Start the backup script with pm2. We are using pm2 to make sure this handles script failures and restart automatically. This is similar to supervisor in php ecosystem
 
 ```
-cd <directory where you have this backup project> && pm2 start pm2.config.js
+cd <directory where you have this backup project> && npm start
 ```
