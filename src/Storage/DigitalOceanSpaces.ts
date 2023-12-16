@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 import { S3, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
 
 export default class DigitalOceanSpaces {
@@ -17,7 +18,10 @@ export default class DigitalOceanSpaces {
     const s3Client = new S3(s3ClientConfig);
 
     try {
-      const file = fs.readFileSync(path.join(__dirname, "../", file_name));
+      const dirname = path.dirname(
+        path.dirname(fileURLToPath(import.meta.url))
+      );
+      const file = fs.readFileSync(path.join(dirname, "../", file_name));
 
       const upload_path = `db_backups/${file_name.split("/")[1]}`;
       const bucketParams = {
