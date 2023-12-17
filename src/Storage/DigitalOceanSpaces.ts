@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import { S3, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
+import config from "../Config/Config";
 
 export default class DigitalOceanSpaces {
   public async upload(file_name: string) {
@@ -23,7 +24,9 @@ export default class DigitalOceanSpaces {
       );
       const file = fs.readFileSync(path.join(dirname, "../", file_name));
 
-      const upload_path = `db_backups/${file_name.split("/")[1]}`;
+      const upload_path = `db_backups/${config.APP_NAME}/${
+        file_name.split("/")[file_name.split("/").length - 1]
+      }`;
       const bucketParams = {
         Bucket: process.env.DO_SPACES_BUCKET!,
         Key: upload_path,

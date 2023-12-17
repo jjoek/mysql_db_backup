@@ -1,6 +1,7 @@
 import * as dotenv from "dotenv";
 import GoogleCloud from "./GoogleCloud";
 import DigitalOceanSpaces from "./DigitalOceanSpaces";
+import ErrorNotify from "../ErrorNotify";
 
 export default class SaveDumpFile {
   protected driver: any;
@@ -15,12 +16,18 @@ export default class SaveDumpFile {
   }
 
   public async upload(): Promise<string> {
+    if (this.driver == "spaces") {
+      return await new DigitalOceanSpaces().upload(this.file_name);
+    }
+
     if (this.driver == "googleCloud") {
       return await new GoogleCloud().upload(this.file_name);
-    } else if (this.driver == "spaces") {
-      return await new DigitalOceanSpaces().upload(this.file_name);
-    } else {
-      throw new Error(`Unsupported storage driver (${this.driver})`);
     }
+
+    await new ErrorNotify().run(
+      `Unsupported storage driver (${this.driver})`,
+      true
+    );
+    return "";
   }
 }

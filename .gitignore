@@ -2,3 +2,6 @@
 /.env
 /google.json
 /dev.md
+/tmp/*
+/tmp_backups/mysqldumps/*
+/tmp_backups/xtrabackups/*

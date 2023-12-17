@@ -1,5 +1,7 @@
 import nodemailer from "nodemailer";
 import BaseMailer from "../BaseMailer";
+import { promisify } from "util";
+import chalk from "chalk";
 
 export default class Smtp extends BaseMailer {
   constructor(
@@ -31,13 +33,22 @@ export default class Smtp extends BaseMailer {
       html: this.html_content,
     };
 
+    const sendMailAsync = promisify(transporter.sendMail).bind(transporter);
+
     // Send the email
-    transporter.sendMail(mailOptions, (error: Error | null, info: any) => {
-      if (error) {
-        console.error("Email send error:", error);
-      } else {
-        console.log("Email sent:", info.response);
-      }
-    });
+    try {
+      await sendMailAsync(mailOptions);
+      console.log(
+        chalk.green(`\tEmail Sent successfully:`) +
+          chalk.yellow(` ${this.subject}`)
+      );
+    } catch (e: any) {
+      console.log(
+        chalk.green(
+          `\t\Unable to send email: ${e.message} Sent successfully` +
+            chalk.yellow(` ${this.subject}`)
+        )
+      );
+    }
   }
 }

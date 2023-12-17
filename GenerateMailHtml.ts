@@ -1,12 +1,7 @@
-export default class GenerateMailHtml {
-  public run(
-    message: string,
-    date: string,
-    download_path: string,
-    error: Error | string | null = ""
-  ) {
-    let error_msg = error ? error : "";
+import config from "./src/Config/Config";
 
+export default class GenerateMailHtml {
+  public run(message: string) {
     return `<!DOCTYPE html>
     <html>
     <head>
@@ -15,14 +10,14 @@ export default class GenerateMailHtml {
             body {
                 font-family: Arial, sans-serif;
                 text-align: center;
-                background-color: ${process.env.THEME_COLOR};
+                background-color: ${config.THEME_COLOR};
                 color: white;
             }
             .container {
                 margin: 100px auto;
                 max-width: 400px;
                 padding: 20px;
-                background-color: ${process.env.THEME_COLOR};
+                background-color: ${config.THEME_COLOR};
                 border-radius: 5px;
             }
             h1 {
@@ -35,18 +30,26 @@ export default class GenerateMailHtml {
     </head>
     <body>
         <div class="container">
-            <h1>${message}</h1>
-            
             <div>
-                App Name: ${process.env.APP_NAME} <br/>
-                Database: ${process.env.DB_NAME} <br/>
-                Date: ${date}
+                App Name: ${config.APP_NAME} <br/>
+                Database: ${config.DB_NAME} <br/>
+                Date: ${
+                  new Date().getFullYear() +
+                  "/0" +
+                  (new Date().getMonth() + 1) +
+                  "/" +
+                  new Date().getDate() +
+                  " " +
+                  new Date().getHours() +
+                  ":" +
+                  new Date().getMinutes() +
+                  ":" +
+                  new Date().getSeconds()
+                }
             </div>
 
 
-            <p><a href="${download_path}">Download Backup</a></p>
-
-            <div>${error_msg}</div>
+            <div>${message}<div>
         </div>
     </body>
     </html>

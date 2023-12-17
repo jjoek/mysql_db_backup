@@ -1,0 +1,107 @@
+import * as mysql from "mysql2/promise";
+import config from "../Config/Config";
+import Helpers from "../Helpers";
+import chalk from "chalk";
+import ErrorNotify from "../ErrorNotify";
+import { exec } from "node:child_process";
+import { promisify } from "util";
+import SaveDumpFile from "../Storage/SaveDumpFile";
+import SuccessNotify from "../SuccessNotify";
+
+const log = (str: string) => {
+  console.log(`\t${str}`);
+};
+const execAsync = promisify(exec);
+
+export default class MysqlDumpBackupTask {
+  /**
+   * Run backup using mysqldump
+   * @param date
+   */
+  public async run(date: Date) {
+    let dump_path = this.getDumpPath(date);
+
+    // connect and backup
+    log("Downloading backup");
+    await this.downloadBackupAndCompress(dump_path);
+
+    // new path name after compression
+    dump_path = `${dump_path}.gz`;
+
+    // upload backup and get backup downloadable path
+    log("Uploading backup");
+    let download_path = await this.uploadBackup(dump_path);
+
+    // Email out success
+    log("Emailing success backup");
+    await new SuccessNotify().run(download_path);
+
+    // Remove local dump
+    log("Removing the dump locally");
+    await execAsync(`rm -rf ${dump_path}`);
+  }
+
+  /**
+   * Download backup
+   * @param dump_path
+   * @param connection
+   */
+  private async downloadBackupAndCompress(dump_path: string) {
+    // download backup
+    const dumpCommand = `mysqldump --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} ${config.DB_NAME} > ${dump_path}`;
+    try {
+      await execAsync(dumpCommand);
+    } catch (e: any) {
+      const err_msg = `Error when downloading db backup: ${e.message}`;
+      log(chalk.red(err_msg));
+      await new ErrorNotify().run(err_msg, true);
+      // clear any file if any was created
+      await execAsync(`rm -rf ${dump_path}`);
+    }
+
+    // compress backup with gzip
+    try {
+      await execAsync(`gzip ${dump_path}`);
+    } catch (e: any) {
+      const err_msg = `Error when compressing db backup: ${e.message}`;
+      log(chalk.red(err_msg));
+      await new ErrorNotify().run(err_msg, true);
+    }
+
+    return;
+  }
+
+  /**
+   * Upload backup
+   * @param dump_path
+   * @returns
+   */
+  private async uploadBackup(dump_path: string) {
+    let download_path = "";
+    try {
+      download_path = await new SaveDumpFile(dump_path).upload();
+    } catch (e: any) {
+      let err_msg = typeof e === "string" ? e : e.message;
+      const upload_err = `Failed to upload dump file ${err_msg}`;
+      log(chalk.red(upload_err));
+      await new ErrorNotify().run(upload_err, true);
+    }
+
+    return download_path;
+  }
+
+  /**
+   * Get the local dump path
+   * @param date
+   * @returns
+   */
+  private getDumpPath(date: Date) {
+    const dump_path = `tmp_backups/mysqldumps/backup-${
+      config.DB_NAME
+    }-${Helpers.dateFormatForFilename(date)}.sql`;
+
+    log(`Dumping export to ${chalk.yellow(dump_path)}`);
+
+    return dump_path;
+  }
+}

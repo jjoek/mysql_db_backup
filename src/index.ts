@@ -17,16 +17,10 @@ const log = (str: string) => {
 export const initiateBackup = async () => {
   log(`\n\nMysql DB Backup version: ${chalk.green("v1.0.0")}`);
 
+  // Env validate and any other prerequisites to run backup
   await new ValidatePrerequisites().run();
-  log("1. All pre-requisites look okay 👍🏽");
 
-  const backup_option = config.BACKUP_SOLN_TYPE;
-  log(
-    `2. Starting the backup process using: ${chalk.green(
-      backup_option
-    )} as the configured backup option`
-  );
-
+  // Start the backup process
   await new Backup().run();
   log(chalk.green("Done!!"));
 };
