@@ -2,6 +2,7 @@ import nodemailer from "nodemailer";
 import BaseMailer from "../BaseMailer";
 import { promisify } from "util";
 import chalk from "chalk";
+import config from "../../Config/Config";
 
 export default class Smtp extends BaseMailer {
   constructor(
@@ -16,19 +17,19 @@ export default class Smtp extends BaseMailer {
     let transporter;
 
     transporter = nodemailer.createTransport({
-      host: process.env.MAIL_HOST,
-      port: process.env.MAIL_PORT ? parseInt(process.env.MAIL_PORT) : 2525,
+      host: config.MAIL_HOST,
+      port: config.MAIL_PORT ? parseInt(config.MAIL_PORT) : 2525,
       auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
+        user: config.MAIL_USER,
+        pass: config.MAIL_PASSWORD,
       },
     });
 
     // Email content
     const mailOptions = {
-      from: process.env.MAIL_FROM,
-      to: process.env.MAIL_RECIPIENTS?.split(",").map((e) => e.trim()),
-      cc: process.env.MAIL_RECIPIENTS,
+      from: config.MAIL_FROM,
+      to: config.MAIL_RECIPIENTS?.split(",").map((e) => e.trim()),
+      cc: config.MAIL_RECIPIENTS,
       subject: this.subject,
       html: this.html_content,
     };

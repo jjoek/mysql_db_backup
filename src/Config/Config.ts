@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { AppConfig, BackupType, StorageDriver, MailDriver } from "./Env";
+import ErrorNotify from "../ErrorNotify";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -156,7 +157,7 @@ const config: AppConfig = {
 
 function inType(type: any, value: string | undefined, type_name: string) {
   if (!value || !Object.values(type).includes(value)) {
-    throw new Error(`Invalid or missing ${type_name}`);
+    new ErrorNotify().run(`Invalid or missing ${type_name}`, true);
   }
   return true;
 }

@@ -1,3 +1,4 @@
+import config from "./Config/Config";
 import SendMail from "./Mail/SendMail";
 
 export default class ErrorNotify {
@@ -10,7 +11,7 @@ export default class ErrorNotify {
     `;
 
     await new SendMail().send(
-      `${process.env.DB_NAME}: Error backing up db:`,
+      `${config.DB_NAME}: Error backing up db:`,
       message
     );
 

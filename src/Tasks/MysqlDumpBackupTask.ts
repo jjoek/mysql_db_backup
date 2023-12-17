@@ -5,7 +5,7 @@ import chalk from "chalk";
 import ErrorNotify from "../ErrorNotify";
 import { exec } from "node:child_process";
 import { promisify } from "util";
-import SaveDumpFile from "../Storage/SaveDumpFile";
+import BackupStorage from "../Storage/BackupStorage";
 import SuccessNotify from "../SuccessNotify";
 
 const log = (str: string) => {
@@ -79,7 +79,7 @@ export default class MysqlDumpBackupTask {
   private async uploadBackup(dump_path: string) {
     let download_path = "";
     try {
-      download_path = await new SaveDumpFile(dump_path).upload();
+      download_path = await new BackupStorage(dump_path).upload();
     } catch (e: any) {
       let err_msg = typeof e === "string" ? e : e.message;
       const upload_err = `Failed to upload dump file ${err_msg}`;

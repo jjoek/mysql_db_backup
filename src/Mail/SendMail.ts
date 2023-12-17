@@ -2,6 +2,7 @@ import GenerateMailHtml from "../../GenerateMailHtml";
 import Postmark from "./Drivers/Postmark";
 import Smtp from "./Drivers/Smtp";
 import config from "../Config/Config";
+import ErrorNotify from "../ErrorNotify";
 
 export default class SendMail {
   public async send(subject: string, message: string) {
@@ -15,6 +16,9 @@ export default class SendMail {
       return await new Postmark(subject, html_content).send();
     }
 
-    throw new Error(`Unsupported driver (${config.MAIL_DRIVER})`);
+    new ErrorNotify().run(
+      `Unsupported mail driver (${config.MAIL_DRIVER})`,
+      true
+    );
   }
 }

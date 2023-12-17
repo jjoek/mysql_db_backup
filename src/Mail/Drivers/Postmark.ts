@@ -1,3 +1,4 @@
+import config from "../../Config/Config";
 import BaseMailer from "../BaseMailer";
 import * as PostmarkDriver from "postmark";
 
@@ -12,12 +13,12 @@ export default class Postmark extends BaseMailer {
 
   public async send() {
     const client = new PostmarkDriver.ServerClient(
-      process.env.POSTMARK_SERVER_API_TOKEN!
+      config.POSTMARK_SERVER_API_TOKEN!
     );
 
-    process.env.MAIL_RECIPIENTS!.split(",").forEach((email) => {
+    config.MAIL_RECIPIENTS!.split(",").forEach((email) => {
       client.sendEmail({
-        From: process.env.MAIL_FROM!,
+        From: config.MAIL_FROM!,
         To: email.trim(),
         Subject: this.subject,
         HtmlBody: this.html_content,

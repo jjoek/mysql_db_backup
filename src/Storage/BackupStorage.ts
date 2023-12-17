@@ -2,15 +2,16 @@ import * as dotenv from "dotenv";
 import GoogleCloud from "./GoogleCloud";
 import DigitalOceanSpaces from "./DigitalOceanSpaces";
 import ErrorNotify from "../ErrorNotify";
+import config from "../Config/Config";
 
-export default class SaveDumpFile {
+export default class BackupStorage {
   protected driver: any;
 
   protected file_name: string;
 
   constructor(file_name: string) {
     dotenv.config();
-    this.driver = process.env.STORAGE_DRIVER;
+    this.driver = config.STORAGE_DRIVER;
 
     this.file_name = file_name;
   }
@@ -29,5 +30,20 @@ export default class SaveDumpFile {
       true
     );
     return "";
+  }
+
+  public async prune() {
+    if (this.driver == "spaces") {
+      return await new DigitalOceanSpaces().prune();
+    }
+
+    if (this.driver == "googleCloud") {
+      return await new GoogleCloud().prune();
+    }
+
+    await new ErrorNotify().run(
+      `Unsupported storage driver (${this.driver})`,
+      true
+    );
   }
 }

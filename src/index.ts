@@ -9,6 +9,7 @@ import chalk from "chalk";
 import config from "./Config/Config";
 import ValidatePrerequisites from "./ValidatePrerequisites";
 import Backup from "./Backup";
+import PruneOldBackups from "./PruneOldBackups";
 
 const log = (str: string) => {
   console.log(str);
@@ -21,8 +22,12 @@ export const initiateBackup = async () => {
   await new ValidatePrerequisites().run();
 
   // Start the backup process
-  await new Backup().run();
+  // await new Backup().run();
   log(chalk.green("Done!!"));
+
+  // Prune Older backups
+  log(chalk.yellow("Prunning old backups"));
+  await new PruneOldBackups().run();
 };
 
 await initiateBackup();

@@ -1,5 +1,6 @@
 import path from "path";
 import { Storage } from "@google-cloud/storage";
+import config from "../Config/Config";
 
 export default class GoogleCloud {
   public async upload(file_name: string): Promise<string> {
@@ -7,17 +8,17 @@ export default class GoogleCloud {
       keyFilename: `${path.join(
         __dirname,
         "../",
-        process.env.GOOGLE_SERVICES_KEY_NAME!
+        config.GOOGLE_SERVICES_KEY_NAME!
       )}`,
     });
 
-    const bucket_name = process.env.GOOGLE_BUCKET_NAME;
+    const bucket_name = config.GOOGLE_BUCKET_NAME;
     const bucket = storage.bucket(bucket_name!);
 
     bucket.upload(
       path.join(__dirname, "../", file_name),
       {
-        destination: `db_backups/${process.env.APP_NAME}/${file_name.replace(
+        destination: `db_backups/${config.APP_NAME}/${file_name.replace(
           "/",
           "_"
         )}`,
@@ -33,4 +34,6 @@ export default class GoogleCloud {
 
     return "path";
   }
+
+  public async prune() {}
 }

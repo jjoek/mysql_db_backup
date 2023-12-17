@@ -1,3 +1,4 @@
+import config from "./Config/Config";
 import SendMail from "./Mail/SendMail";
 
 export default class SuccessNotify {
@@ -9,7 +10,7 @@ export default class SuccessNotify {
     `;
 
     await new SendMail().send(
-      `${process.env.DB_NAME}: Successfully backed up`,
+      `${config.DB_NAME}: Successfully backed up`,
       message
     );
   }
