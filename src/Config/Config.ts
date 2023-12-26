@@ -158,7 +158,7 @@ const config: AppConfig = {
   // AWS S3
   AWS_S3_KEY:
     process.env.STORAGE_DRIVER &&
-    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    process.env.STORAGE_DRIVER === StorageDriver.AWS_S3 &&
     !process.env.AWS_S3_KEY
       ? missingEnvError(
           "If the storage driver is set to spaces, we also require the AWS_S3_KEY"
@@ -166,7 +166,7 @@ const config: AppConfig = {
       : process.env.AWS_S3_KEY,
   AWS_S3_SECRET:
     process.env.STORAGE_DRIVER &&
-    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    process.env.STORAGE_DRIVER === StorageDriver.AWS_S3 &&
     !process.env.AWS_S3_SECRET
       ? missingEnvError(
           "If the storage driver is set to spaces, we also require the AWS_S3_SECRET"
@@ -174,7 +174,7 @@ const config: AppConfig = {
       : process.env.AWS_S3_SECRET,
   AWS_S3_ENDPOINT:
     process.env.STORAGE_DRIVER &&
-    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    process.env.STORAGE_DRIVER === StorageDriver.AWS_S3 &&
     !process.env.AWS_S3_ENDPOINT
       ? missingEnvError(
           "If the storage driver is set to spaces, we also require the AWS_S3_ENDPOINT"
@@ -182,7 +182,7 @@ const config: AppConfig = {
       : process.env.AWS_S3_ENDPOINT,
   AWS_S3_REGION:
     process.env.STORAGE_DRIVER &&
-    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    process.env.STORAGE_DRIVER === StorageDriver.AWS_S3 &&
     !process.env.AWS_S3_REGION
       ? missingEnvError(
           "If the storage driver is set to spaces, we also require the AWS_S3_REGION"
@@ -190,7 +190,7 @@ const config: AppConfig = {
       : process.env.AWS_S3_REGION,
   AWS_S3_BUCKET:
     process.env.STORAGE_DRIVER &&
-    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    process.env.STORAGE_DRIVER === StorageDriver.AWS_S3 &&
     !process.env.AWS_S3_BUCKET
       ? missingEnvError(
           "If the storage driver is set to spaces, we also require the AWS_S3_BUCKET"
