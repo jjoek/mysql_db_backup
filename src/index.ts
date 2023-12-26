@@ -26,7 +26,7 @@ export const initiateBackup = async () => {
   log(chalk.green("Done!!"));
 
   // Prune Older backups
-  log(chalk.yellow("Prunning old backups"));
+  log("3. Prunning old backups");
   await new PruneOldBackups().run();
 };
 

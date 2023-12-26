@@ -1,6 +1,6 @@
 import path from "path";
 import { Storage } from "@google-cloud/storage";
-import config from "../Config/Config";
+import config from "../../../Config/Config";
 
 export default class GoogleCloud {
   public async upload(file_name: string): Promise<string> {

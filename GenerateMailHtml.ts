@@ -1,7 +1,20 @@
 import config from "./src/Config/Config";
 
 export default class GenerateMailHtml {
-  public run(message: string) {
+  public run(message: string, err: any = null) {
+    let stack_trace = err
+      ? `
+        <br/>
+        <div class="stack-trace">
+            <h3>Error Stack trace </h3>
+
+            <code>
+                ${err.stack}
+            <code>
+        </div>
+    `
+      : ``;
+
     return `<!DOCTYPE html>
     <html>
     <head>
@@ -26,6 +39,21 @@ export default class GenerateMailHtml {
             p {
                 font-size: 18px;
             }
+            .error-container {
+                margin-top: 30px;
+            }
+            .stack-trace {
+                background-color: #2c3e50;
+                color: #ecf0f1;
+                padding: 15px;
+                border-radius: 5px;
+                overflow-x: auto;
+                text-align: left;
+            }
+            code {
+                display: block;
+                white-space: pre-wrap;
+            }
         </style>
     </head>
     <body>
@@ -48,8 +76,11 @@ export default class GenerateMailHtml {
                 }
             </div>
 
-
+            <br/>
+            
             <div>${message}<div>
+
+            ${stack_trace}
         </div>
     </body>
     </html>

@@ -30,7 +30,7 @@ export default class MysqlDumpBackupTask {
 
     // upload backup and get backup downloadable path
     log("Uploading backup");
-    let download_path = await this.uploadBackup(dump_path);
+    let download_path = await new BackupStorage(dump_path).upload();
 
     // Email out success
     log("Emailing success backup");
@@ -69,25 +69,6 @@ export default class MysqlDumpBackupTask {
     }
 
     return;
-  }
-
-  /**
-   * Upload backup
-   * @param dump_path
-   * @returns
-   */
-  private async uploadBackup(dump_path: string) {
-    let download_path = "";
-    try {
-      download_path = await new BackupStorage(dump_path).upload();
-    } catch (e: any) {
-      let err_msg = typeof e === "string" ? e : e.message;
-      const upload_err = `Failed to upload dump file ${err_msg}`;
-      log(chalk.red(upload_err));
-      await new ErrorNotify().run(upload_err, true);
-    }
-
-    return download_path;
   }
 
   /**

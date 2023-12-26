@@ -1,6 +1,6 @@
 import * as dotenv from "dotenv";
-import GoogleCloud from "./GoogleCloud";
-import DigitalOceanSpaces from "./DigitalOceanSpaces";
+import GoogleCloud from "./Drivers/GoogleCloud/GoogleCloud";
+import DigitalOceanSpaces from "./Drivers/DigitalOceanSpaces/DigitalOceanSpaces";
 import ErrorNotify from "../ErrorNotify";
 import config from "../Config/Config";
 
@@ -9,7 +9,7 @@ export default class BackupStorage {
 
   protected file_name: string;
 
-  constructor(file_name: string) {
+  constructor(file_name: string = "") {
     dotenv.config();
     this.driver = config.STORAGE_DRIVER;
 
