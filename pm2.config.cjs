@@ -8,6 +8,7 @@ module.exports = {
       script: "./src/index.ts",
       interpreter: "./node_modules/.bin/ts-node",
       cron_restart: process.env.BACKUP_CRON_SCHEDULE,
+      autorestart: false,
     },
   ],
 };

@@ -6,7 +6,6 @@
  *
  */
 import chalk from "chalk";
-import config from "./Config/Config";
 import ValidatePrerequisites from "./ValidatePrerequisites";
 import Backup from "./Backup";
 import PruneOldBackups from "./PruneOldBackups";
