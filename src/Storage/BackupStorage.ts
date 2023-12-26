@@ -1,49 +1,45 @@
-import * as dotenv from "dotenv";
 import GoogleCloud from "./Drivers/GoogleCloud/GoogleCloud";
-import DigitalOceanSpaces from "./Drivers/DigitalOceanSpaces/DigitalOceanSpaces";
 import ErrorNotify from "../ErrorNotify";
 import config from "../Config/Config";
-
+import AwsS3OrSpaces from "./Drivers/AwsS3OrSpaces/AwsS3OrSpaces";
 export default class BackupStorage {
   protected driver: any;
 
   protected file_name: string;
 
   constructor(file_name: string = "") {
-    dotenv.config();
-    this.driver = config.STORAGE_DRIVER;
-
+    this.driver = this.getDriver();
     this.file_name = file_name;
   }
 
+  /**
+   * Currently supporting Aws, DigitalOcean Spaces and GCP
+   * Aws and Digi spaces have the same api and thus sharing the provider here
+   * @returns
+   */
+  private getDriver() {
+    const driver_assocs: any = {
+      aws_s3: AwsS3OrSpaces,
+      spaces: AwsS3OrSpaces,
+      gcp_bucket: GoogleCloud,
+    };
+
+    const driver = driver_assocs[config.STORAGE_DRIVER];
+
+    if (!driver) {
+      const err_msg = `Unsupported storage driver (${config.STORAGE_DRIVER})`;
+      new ErrorNotify().run(err_msg, true);
+      throw new Error(err_msg);
+    }
+
+    return driver;
+  }
+
   public async upload(): Promise<string> {
-    if (this.driver == "spaces") {
-      return await new DigitalOceanSpaces().upload(this.file_name);
-    }
-
-    if (this.driver == "googleCloud") {
-      return await new GoogleCloud().upload(this.file_name);
-    }
-
-    await new ErrorNotify().run(
-      `Unsupported storage driver (${this.driver})`,
-      true
-    );
-    return "";
+    return new this.driver().upload(this.file_name);
   }
 
   public async prune() {
-    if (this.driver == "spaces") {
-      return await new DigitalOceanSpaces().prune();
-    }
-
-    if (this.driver == "googleCloud") {
-      return await new GoogleCloud().prune();
-    }
-
-    await new ErrorNotify().run(
-      `Unsupported storage driver (${this.driver})`,
-      true
-    );
+    return new this.driver().prune();
   }
 }

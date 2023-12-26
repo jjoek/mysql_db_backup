@@ -12,7 +12,7 @@ function log(msg: string) {
   console.log(`\t ${msg}`);
 }
 
-export default class SpacesPruner {
+export default class AwsS3OrSpacesPruner {
   private base_upload_path = "";
 
   private s3Client;

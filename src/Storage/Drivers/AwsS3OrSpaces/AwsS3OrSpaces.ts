@@ -4,21 +4,42 @@ import { fileURLToPath } from "url";
 import { S3, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "../../../Config/Config";
 import ErrorNotify from "../../../ErrorNotify";
-import SpacesPruner from "./SpacesPruner";
+import AwsS3OrSpacesPruner from "./AwsS3OrSpacesPruner";
 
-export default class DigitalOceanSpaces {
+export default class AwsS3OrSpaces {
   private s3Client;
 
   private base_upload_path: string;
 
+  private bucket_name: string;
+  private region: string;
+
+  private is_aws = true;
+
   constructor() {
+    this.is_aws = config.STORAGE_DRIVER === "aws_s3";
+
+    const endpoint = this.is_aws
+      ? config.AWS_S3_ENDPOINT!
+      : config.DO_SPACES_ENDPOINT!;
+    this.region = this.is_aws
+      ? config.AWS_S3_REGION!
+      : config.DO_SPACES_REGION!;
+    const key = this.is_aws ? config.AWS_S3_KEY! : config.DO_SPACES_KEY!;
+    const secret = this.is_aws
+      ? config.AWS_S3_SECRET!
+      : config.DO_SPACES_SECRET!;
+    this.bucket_name = this.is_aws
+      ? config.AWS_S3_BUCKET!
+      : config.DO_SPACES_BUCKET!;
+
     const s3ClientConfig: S3ClientConfig = {
       forcePathStyle: false,
-      endpoint: config.DO_SPACES_ENDPOINT!,
-      region: config.DO_SPACES_REGION,
+      endpoint,
+      region: this.region,
       credentials: {
-        accessKeyId: config.DO_SPACES_KEY!,
-        secretAccessKey: config.DO_SPACES_SECRET!,
+        accessKeyId: key,
+        secretAccessKey: secret,
       },
     };
 
@@ -27,7 +48,7 @@ export default class DigitalOceanSpaces {
     this.base_upload_path = `db_backups/${config.APP_NAME}`;
   }
 
-  public async upload(file_name: string): Promise<string> {
+  public async upload(file_name: string) {
     try {
       const dirname = path.dirname(
         path.dirname(fileURLToPath(import.meta.url))
@@ -38,14 +59,14 @@ export default class DigitalOceanSpaces {
         file_name.split("/")[file_name.split("/").length - 1]
       }`;
       const bucketParams = {
-        Bucket: config.DO_SPACES_BUCKET!,
+        Bucket: this.bucket_name,
         Key: upload_path,
         Body: file,
       };
 
       await this.s3Client.send(new PutObjectCommand(bucketParams));
 
-      return `https://${config.DO_SPACES_BUCKET}.sfo2.digitaloceanspaces.com/${upload_path}`;
+      return "";
     } catch (err: any) {
       await new ErrorNotify().run(
         `Unable to upload file to digital ocean spaces ${err.message}`,
@@ -57,6 +78,6 @@ export default class DigitalOceanSpaces {
   }
 
   public async prune() {
-    await new SpacesPruner(this.s3Client).run();
+    await new AwsS3OrSpacesPruner(this.s3Client).run();
   }
 }

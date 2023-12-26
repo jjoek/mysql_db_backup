@@ -10,6 +10,7 @@ export enum MailDriver {
 }
 
 export enum StorageDriver {
+  AWS_S3 = "aws_s3",
   SPACES = "spaces",
   GCP_BUCKET = "gcp_bucket",
 }
@@ -55,4 +56,11 @@ export interface AppConfig {
   DO_SPACES_ENDPOINT: string | undefined;
   DO_SPACES_REGION: string | undefined;
   DO_SPACES_BUCKET: string | undefined;
+
+  // spaces
+  AWS_S3_KEY: string | undefined;
+  AWS_S3_SECRET: string | undefined;
+  AWS_S3_ENDPOINT: string | undefined;
+  AWS_S3_REGION: string | undefined;
+  AWS_S3_BUCKET: string | undefined;
 }

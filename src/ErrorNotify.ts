@@ -10,11 +10,8 @@ export default class ErrorNotify {
         </div>
     `;
 
-    await new SendMail().send(
-      `${config.DB_NAME}: Error backing up db:`,
-      message,
-      err
-    );
+    const db_name = config ? config.DB_NAME : "";
+    await new SendMail().send(`${db_name}: Error backing up db:`, message, err);
 
     if (throws) {
       console.log(err);

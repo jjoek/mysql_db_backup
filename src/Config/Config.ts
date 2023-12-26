@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import { AppConfig, BackupType, StorageDriver, MailDriver } from "./Env";
 import ErrorNotify from "../ErrorNotify";
+import chalk from "chalk";
 
 // Load environment variables from .env file
 dotenv.config();
@@ -153,11 +154,55 @@ const config: AppConfig = {
           "If the storage driver is set to spaces, we also require the DO_SPACES_BUCKET"
         )
       : process.env.DO_SPACES_BUCKET,
+
+  // AWS S3
+  AWS_S3_KEY:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    !process.env.AWS_S3_KEY
+      ? missingEnvError(
+          "If the storage driver is set to spaces, we also require the AWS_S3_KEY"
+        )
+      : process.env.AWS_S3_KEY,
+  AWS_S3_SECRET:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    !process.env.AWS_S3_SECRET
+      ? missingEnvError(
+          "If the storage driver is set to spaces, we also require the AWS_S3_SECRET"
+        )
+      : process.env.AWS_S3_SECRET,
+  AWS_S3_ENDPOINT:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    !process.env.AWS_S3_ENDPOINT
+      ? missingEnvError(
+          "If the storage driver is set to spaces, we also require the AWS_S3_ENDPOINT"
+        )
+      : process.env.AWS_S3_ENDPOINT,
+  AWS_S3_REGION:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    !process.env.AWS_S3_REGION
+      ? missingEnvError(
+          "If the storage driver is set to spaces, we also require the AWS_S3_REGION"
+        )
+      : process.env.AWS_S3_REGION,
+  AWS_S3_BUCKET:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.SPACES &&
+    !process.env.AWS_S3_BUCKET
+      ? missingEnvError(
+          "If the storage driver is set to spaces, we also require the AWS_S3_BUCKET"
+        )
+      : process.env.AWS_S3_BUCKET,
 };
 
 function inType(type: any, value: string | undefined, type_name: string) {
   if (!value || !Object.values(type).includes(value)) {
-    new ErrorNotify().run(`Invalid or missing ${type_name}`, true);
+    const err_msg = `Invalid or missing ${type_name}`;
+    console.log(chalk.red(err_msg));
+    new ErrorNotify().run(err_msg, true);
   }
   return true;
 }
