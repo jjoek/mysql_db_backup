@@ -1,11 +1,10 @@
 {
-  "name": "wkp_backup_script",
+  "name": "Mysql DB backup Script",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "npx pm2 start pm2.config.js"
+    "start": "npx pm2 start pm2.config.cjs"
   },
   "author": "",
   "license": "ISC",
