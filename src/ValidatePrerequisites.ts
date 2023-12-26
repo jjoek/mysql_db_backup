@@ -27,10 +27,11 @@ export default class ValidatePrerequisites {
     if (backup_driver === BackupType.MYSQLDUMP) {
       try {
         await execAsync("mysqldump --version");
-      } catch (e: any) {
+      } catch (err: any) {
         await new ErrorNotify().run(
-          `Mysqldump is not installed on the host machine, please setup it up first before continuing: ${e.message}`,
-          true
+          `Mysqldump is not installed on the host machine, please setup it up first before continuing: ${err.message}`,
+          true,
+          err
         );
       }
 
@@ -39,7 +40,8 @@ export default class ValidatePrerequisites {
       } catch (e: any) {
         await new ErrorNotify().run(
           `Gzip is not installed on the host machine, please setup it up first before continuing: ${e.message}`,
-          true
+          true,
+          e
         );
       }
     }
@@ -47,10 +49,11 @@ export default class ValidatePrerequisites {
     if (backup_driver === BackupType.XTRABACKUP) {
       try {
         await execAsync("xtrabackup --version");
-      } catch (e: any) {
+      } catch (err: any) {
         await new ErrorNotify().run(
-          `Percona xtrabackup is not installed on the host machine, please setup it up first before continuing: ${e.message}`,
-          true
+          `Percona xtrabackup is not installed on the host machine, please setup it up first before continuing: ${err.message}`,
+          true,
+          err
         );
       }
     }

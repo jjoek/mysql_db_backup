@@ -17,8 +17,8 @@ export default class XtraBackupTask {
       const backupCmd = `sudo xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
 
       //   this.backupDB(backupCmd, date, dump_path);
-    } catch (e: any) {
-      const err_msg = `Backup download failed backup errored: ${e?.message}`;
+    } catch (err: any) {
+      const err_msg = `Backup download failed backup errored: ${err?.message}`;
       log(chalk.red(err_msg));
       await new ErrorNotify().run(err_msg);
     }

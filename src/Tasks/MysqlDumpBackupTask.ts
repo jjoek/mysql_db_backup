@@ -51,10 +51,10 @@ export default class MysqlDumpBackupTask {
     const dumpCommand = `mysqldump --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} ${config.DB_NAME} > ${dump_path}`;
     try {
       await execAsync(dumpCommand);
-    } catch (e: any) {
-      const err_msg = `Error when downloading db backup: ${e.message}`;
+    } catch (err: any) {
+      const err_msg = `Error when downloading db backup: ${err.message}`;
       log(chalk.red(err_msg));
-      await new ErrorNotify().run(err_msg, true);
+      await new ErrorNotify().run(err_msg, true, err);
       // clear any file if any was created
       await execAsync(`rm -rf ${dump_path}`);
     }
@@ -62,10 +62,10 @@ export default class MysqlDumpBackupTask {
     // compress backup with gzip
     try {
       await execAsync(`gzip ${dump_path}`);
-    } catch (e: any) {
-      const err_msg = `Error when compressing db backup: ${e.message}`;
+    } catch (err: any) {
+      const err_msg = `Error when compressing db backup: ${err.message}`;
       log(chalk.red(err_msg));
-      await new ErrorNotify().run(err_msg, true);
+      await new ErrorNotify().run(err_msg, true, err);
     }
 
     return;

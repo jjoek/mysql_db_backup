@@ -66,9 +66,9 @@ export default class SpacesPruner {
 
         try {
           await this.s3Client.send(command);
-        } catch (e: any) {
+        } catch (err: any) {
           await new ErrorNotify().run(
-            `Error deleting backup ${this.base_upload_path}/${obj_key}: Error ${e.message}`
+            `Error deleting backup ${this.base_upload_path}/${obj_key}: Error ${err.message}`
           );
         }
 
@@ -91,10 +91,11 @@ export default class SpacesPruner {
     try {
       const { Contents } = await this.s3Client.send(command);
       data = Contents;
-    } catch (e: any) {
+    } catch (err: any) {
       await new ErrorNotify().run(
-        `Unable to fetch objects from spaces for deletion: ${e.message}`,
-        true
+        `Unable to fetch objects from spaces for deletion: ${err.message}`,
+        true,
+        err
       );
     }
 
