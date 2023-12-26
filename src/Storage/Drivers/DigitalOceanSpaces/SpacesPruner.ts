@@ -87,16 +87,19 @@ export default class SpacesPruner {
       Prefix: `${this.base_upload_path}/`,
     });
 
+    let data = null;
     try {
       const { Contents } = await this.s3Client.send(command);
-
-      return await this.groupFilesBy(Contents, group_type);
+      data = Contents;
     } catch (e: any) {
       await new ErrorNotify().run(
         `Unable to fetch objects from spaces for deletion: ${e.message}`,
         true
       );
     }
+
+    console.log("Data: ", data);
+    return await this.groupFilesBy(data, group_type);
   }
 
   private groupFilesBy(Contents: any, group_by: string = "date") {
