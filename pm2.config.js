@@ -1,6 +1,7 @@
-require("dotenv").config();
+import { config as dotenvConfig } from "dotenv";
+dotenvConfig();
 
-module.exports = {
+export default {
   apps: [
     {
       name: `${process.env.APP_NAME}-db-backup`,
