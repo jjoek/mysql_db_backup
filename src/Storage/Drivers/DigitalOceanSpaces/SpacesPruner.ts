@@ -99,7 +99,6 @@ export default class SpacesPruner {
       );
     }
 
-    console.log("Data: ", data);
     return await this.groupFilesBy(data, group_type);
   }
 

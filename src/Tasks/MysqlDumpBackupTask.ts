@@ -22,7 +22,7 @@ export default class MysqlDumpBackupTask {
     let dump_path = this.getDumpPath(date);
 
     // connect and backup
-    log("Downloading backup");
+    log("Downloading and compressing backup");
     await this.downloadBackupAndCompress(dump_path);
 
     // new path name after compression
