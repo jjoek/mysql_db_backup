@@ -1,26 +1,66 @@
 import chalk from "chalk";
 import config from "../Config/Config";
 import Helpers from "../Helpers";
+import { exec } from "node:child_process";
+import { promisify } from "util";
 import ErrorNotify from "../ErrorNotify";
+import BackupStorage from "../Storage/BackupStorage";
+import SuccessNotify from "../SuccessNotify";
 
 const log = (str: string) => {
   console.log(`\t${str}`);
 };
 
+const execAsync = promisify(exec);
+
 export default class XtraBackupTask {
   public async run(date: Date) {
+    let dump_path = this.getDumpPath(date);
+
+    // connect and backup
+    log("Downloading and compressing backup");
+    await this.downloadBackupAndCompress(dump_path);
+
+    // upload backup and get backup downloadable path
+    log("Uploading backup");
+    let download_path = await new BackupStorage(dump_path).upload();
+
+    // Email out success
+    log("Emailing success backup");
+    await new SuccessNotify().run(download_path);
+
+    // Remove local dump
+    log("Removing the dump locally");
+    await execAsync(`rm -rf ${dump_path}`);
+  }
+
+  private async downloadBackupAndCompress(dump_path: string) {
+    // download backup
+    const backupCmd = `sudo xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
+
+    try {
+      await execAsync(backupCmd);
+    } catch (err: any) {
+      const err_msg = `Error when downloading the db backup: ${err.message}`;
+      log(chalk.red(err_msg));
+      await new ErrorNotify().run(err_msg, true, err);
+      // clear any file if any was created
+      await execAsync(`rm -rf ${dump_path}`);
+    }
+  }
+
+  /**
+   * Get the local dump path
+   * @param date
+   * @returns
+   */
+  private getDumpPath(date: Date) {
     const dump_path = `tmp_backups/xtrabackups/backup-${
       config.DB_NAME
     }-${Helpers.dateFormatForFilename(date)}`;
 
-    try {
-      const backupCmd = `sudo xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
+    log(`Dumping export to ${chalk.yellow(dump_path)}`);
 
-      //   this.backupDB(backupCmd, date, dump_path);
-    } catch (err: any) {
-      const err_msg = `Backup download failed backup errored: ${err?.message}`;
-      log(chalk.red(err_msg));
-      await new ErrorNotify().run(err_msg);
-    }
+    return dump_path;
   }
 }
