@@ -1,25 +1,19 @@
-import {
-  DeleteObjectCommand,
-  ListObjectsV2Command,
-  S3,
-} from "@aws-sdk/client-s3";
-import config from "../../../Config/Config";
+import chalk from "chalk";
 import { DateTime } from "luxon";
 import ErrorNotify from "../../../ErrorNotify";
-import chalk from "chalk";
 
 function log(msg: string) {
   console.log(`\t ${msg}`);
 }
 
-export default class AwsS3OrSpacesPruner {
+export default class GoogleCloudStoragePrunner {
   private base_upload_path = "";
 
-  private s3Client;
+  private db_backup_bucket;
 
-  constructor(s3Client: S3, base_upload_path: string) {
+  constructor(db_backup_bucket: any, base_upload_path: string) {
     this.base_upload_path = base_upload_path;
-    this.s3Client = s3Client;
+    this.db_backup_bucket = db_backup_bucket;
   }
 
   public async run() {
@@ -58,23 +52,20 @@ export default class AwsS3OrSpacesPruner {
 
       const backupsToDelete = backupGroupings[key].slice(0, -1);
 
-      for (let obj_key of backupsToDelete) {
-        const command = new DeleteObjectCommand({
-          Bucket: config.DO_SPACES_BUCKET!,
-          Key: `${this.base_upload_path}/${obj_key}`,
-        });
-
+      for (let obj_name of backupsToDelete) {
         try {
-          await this.s3Client.send(command);
+          await this.db_backup_bucket
+            .file(`${this.base_upload_path}/${obj_name}`)
+            .delete();
         } catch (err: any) {
           await new ErrorNotify().run(
-            `Error deleting backup ${this.base_upload_path}/${obj_key}: Error ${err.message}`
+            `Error deleting backup ${this.base_upload_path}/${obj_name}: Error ${err.message}`
           );
         }
 
         log(
           chalk.red(
-            `\t Backup group (${key}): "${this.base_upload_path}/${obj_key}" deleted successfully!`
+            `\t Backup group (${key}): "${this.base_upload_path}/${obj_name}" deleted successfully!`
           )
         );
       }
@@ -82,24 +73,14 @@ export default class AwsS3OrSpacesPruner {
   }
 
   private async getAllFilesGrouped(group_type: string = "date") {
-    const command = new ListObjectsV2Command({
-      Bucket: config.DO_SPACES_BUCKET!,
-      Prefix: `${this.base_upload_path}/`,
-    });
+    const options = {
+      prefix: this.base_upload_path,
+    };
 
-    let data = null;
-    try {
-      const { Contents } = await this.s3Client.send(command);
-      data = Contents;
-    } catch (err: any) {
-      await new ErrorNotify().run(
-        `Unable to fetch objects from spaces for deletion: ${err.message}`,
-        true,
-        err
-      );
-    }
+    // Lists files in the bucket, filtered by a prefix
+    const [files] = await this.db_backup_bucket.getFiles(options);
 
-    return await this.groupFilesBy(data, group_type);
+    return await this.groupFilesBy(files, group_type);
   }
 
   private groupFilesBy(Contents: any, group_by: string = "date") {
@@ -120,7 +101,7 @@ export default class AwsS3OrSpacesPruner {
     }
 
     for (const object of Contents) {
-      const file_path = object.Key;
+      const file_path = object.name;
       const file_name = file_path?.split("/")[file_path?.split("/").length - 1];
 
       const match = file_name?.match(

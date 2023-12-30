@@ -5,11 +5,10 @@ import { S3, S3ClientConfig, PutObjectCommand } from "@aws-sdk/client-s3";
 import config from "../../../Config/Config";
 import ErrorNotify from "../../../ErrorNotify";
 import AwsS3OrSpacesPruner from "./AwsS3OrSpacesPruner";
+import BaseStorageDriver from "../../BaseStorageDriver";
 
-export default class AwsS3OrSpaces {
+export default class AwsS3OrSpaces extends BaseStorageDriver {
   private s3Client;
-
-  private base_upload_path: string;
 
   private bucket_name: string;
   private region: string;
@@ -17,6 +16,8 @@ export default class AwsS3OrSpaces {
   private is_aws = true;
 
   constructor() {
+    super();
+
     this.is_aws = config.STORAGE_DRIVER === "aws_s3";
 
     const endpoint = this.is_aws
@@ -44,8 +45,6 @@ export default class AwsS3OrSpaces {
     };
 
     this.s3Client = new S3(s3ClientConfig);
-
-    this.base_upload_path = `db_backups/${config.APP_NAME}`;
   }
 
   public async upload(file_name: string) {
@@ -78,6 +77,6 @@ export default class AwsS3OrSpaces {
   }
 
   public async prune() {
-    await new AwsS3OrSpacesPruner(this.s3Client).run();
+    await new AwsS3OrSpacesPruner(this.s3Client, this.base_upload_path).run();
   }
 }

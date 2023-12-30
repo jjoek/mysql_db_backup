@@ -49,6 +49,7 @@ export interface AppConfig {
   // GCP bucket
   GOOGLE_SERVICES_KEY_NAME: string | undefined;
   GOOGLE_BUCKET_NAME: string | undefined;
+  GOOGLE_PROJECT_ID: string | undefined;
 
   // spaces
   DO_SPACES_KEY: string | undefined;

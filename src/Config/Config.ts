@@ -113,6 +113,15 @@ const config: AppConfig = {
         )
       : process.env.GOOGLE_BUCKET_NAME,
 
+  GOOGLE_PROJECT_ID:
+    process.env.STORAGE_DRIVER &&
+    process.env.STORAGE_DRIVER === StorageDriver.GCP_BUCKET &&
+    !process.env.GOOGLE_PROJECT_ID
+      ? missingEnvError(
+          "If the storage driver is set to gcp bucket, we also require the GOOGLE_PROJECT_ID"
+        )
+      : process.env.GOOGLE_PROJECT_ID,
+
   // Digital ocean spaces
   DO_SPACES_KEY:
     process.env.STORAGE_DRIVER &&
@@ -202,7 +211,7 @@ function inType(type: any, value: string | undefined, type_name: string) {
   if (!value || !Object.values(type).includes(value)) {
     const err_msg = `Invalid or missing ${type_name}`;
     console.log(chalk.red(err_msg));
-    new ErrorNotify().run(err_msg, true);
+    throw new Error(err_msg);
   }
   return true;
 }
