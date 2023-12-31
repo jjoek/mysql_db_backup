@@ -53,8 +53,11 @@ export default class XtraBackupTask {
 
     // compress backup with gzip
     try {
-      await execAsync(` zip ${dump_path}.zip`);
-      await execAsync(`rm -rf ${dump_path}`);
+      const file_name = dump_path.split("/")[dump_path.split("/").length - 1];
+      await execAsync(
+        `cd ${dump_path} && cd ../ && zip -r ${file_name}.zip ${file_name}`
+      );
+      await execAsync(`rm -rf ${file_name}`);
     } catch (err: any) {
       const err_msg = `Error when compressing db backup: ${err.message}`;
       log(chalk.red(err_msg));
