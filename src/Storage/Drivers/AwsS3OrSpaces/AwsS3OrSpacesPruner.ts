@@ -124,7 +124,7 @@ export default class AwsS3OrSpacesPruner {
       const file_name = file_path?.split("/")[file_path?.split("/").length - 1];
 
       const match = file_name?.match(
-        /backup-(\w+)-(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})_\d+\.sql\.gz/
+        /backup-(\w+)-(\d{4})(\d{2})(\d{2})_(\d{2})(\d{2})(\d{2})_\d+/
       );
 
       if (match) {
