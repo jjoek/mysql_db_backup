@@ -21,6 +21,9 @@ export default class XtraBackupTask {
     log("Downloading and compressing backup");
     await this.downloadBackupAndCompress(dump_path);
 
+    // new path name after compression
+    dump_path = `${dump_path}.zip`;
+
     // upload backup and get backup downloadable path
     log("Uploading backup");
     let download_path = await new BackupStorage(dump_path).upload();
@@ -36,7 +39,7 @@ export default class XtraBackupTask {
 
   private async downloadBackupAndCompress(dump_path: string) {
     // download backup
-    const backupCmd = `sudo xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
+    const backupCmd = `xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
 
     try {
       await execAsync(backupCmd);
@@ -47,6 +50,18 @@ export default class XtraBackupTask {
       // clear any file if any was created
       await execAsync(`rm -rf ${dump_path}`);
     }
+
+    // compress backup with gzip
+    try {
+      await execAsync(` zip ${dump_path}.zip`);
+      await execAsync(`rm -rf ${dump_path}`);
+    } catch (err: any) {
+      const err_msg = `Error when compressing db backup: ${err.message}`;
+      log(chalk.red(err_msg));
+      await new ErrorNotify().run(err_msg, true, err);
+    }
+
+    return;
   }
 
   /**
