@@ -39,7 +39,7 @@ export default class XtraBackupTask {
 
   private async downloadBackupAndCompress(dump_path: string) {
     // download backup
-    const backupCmd = `xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD} --compress`;
+    const backupCmd = `xtrabackup --backup --databases='${config.DB_NAME}' --target-dir='${dump_path}'  --host=${config.DB_HOST} --user=${config.DB_USER} --password=${config.DB_PASSWORD}`;
 
     try {
       await execAsync(backupCmd);
