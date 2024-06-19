@@ -91,3 +91,8 @@ sudo chown -R mysql:mysql /var/lib/mysql/
 ```
 sudo service mysql start
 ```
+
+
+
+### Switch to TSX instead of ts-node
+see thread: https://stackoverflow.com/a/76343394
