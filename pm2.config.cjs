@@ -6,7 +6,7 @@ module.exports = {
     {
       name: `${process.env.APP_NAME}-db-backup`,
       script: "./src/index.ts",
-      interpreter: "./node_modules/.bin/ts-node",
+      interpreter: "./node_modules/.bin/tsx",
       cron_restart: process.env.BACKUP_CRON_SCHEDULE,
       autorestart: false,
     },
